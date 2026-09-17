@@ -26,6 +26,17 @@ flowchart TD
 
     CHECK_PERIPH -- SÍ --> BIOS_MENU
 
+    RET_BIOS --> BIOS_MENU
+
+    %% FASE 4: APAGADO (EVENTO DE HARDWARE)
+    subgraph F4["4. APAGADO GENERAL"]
+        EVENT_PWR[/Evento: Pulsación Botón Power en BIOS/\]:::ioStyle --> SAVE_SYS[Guardar Registros del Sistema]:::processStyle
+        SAVE_SYS --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle
+        LED_OFF --> SHUTDOWN([Apagado Seguro]):::terminalStyle
+    end
+
+    BIOS_MENU -. Interrupción / Pulsación .-> EVENT_PWR
+
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
         BIOS_MENU[/Menú de Ajustes: Volumen - Keybindings - Batería - Jugar - Multijugador/\]:::ioStyle
@@ -74,20 +85,11 @@ flowchart TD
         
         %% Bucle de Juego Activo
         RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
-        
-        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
         GAME_STATE -- JUGADOR MUERE --> GAME_MENU
-        GAME_STATE -- SALIR DE PAUSA --> GAME_MENU
+        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::io
+        MENU_PAUSE --> MENU_PAUSE_OPT{"¿Opción Pausa?"}:::decision
+        MENU_PAUSE_OPT -- CONTINUAR --> RUN_GAME
+        MENU_PAUSE_OPT -- SALIR --> GAME_MENU
     end
 
-    RET_BIOS --> BIOS_MENU
-
-    %% FASE 4: APAGADO (EVENTO DE HARDWARE)
-    subgraph F4["4. APAGADO GENERAL"]
-        EVENT_PWR[/Evento: Pulsación Botón Power en BIOS/\]:::ioStyle --> SAVE_SYS[Guardar Registros del Sistema]:::processStyle
-        SAVE_SYS --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle
-        LED_OFF --> SHUTDOWN([Apagado Seguro]):::terminalStyle
-    end
-
-    BIOS_MENU -. Interrupción / Pulsación .-> EVENT_PWR
 ```
