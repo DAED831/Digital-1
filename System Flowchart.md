@@ -24,14 +24,14 @@ flowchart TD
         WAIT_P -- NO --> WARN_P
     end
 
-    CHECK_PERIPH -- SÍ --> F2
+    CHECK_PERIPH -- SÍ ---> F2
 
     %% FASE 2: VERIFICACIÓN DE CARTUCHO Y MODO DE JUEGO
     subgraph F2["2. VALIDACIÓN DE CARTUCHO"]
         MENU_CONF[/Menú Configuración Principal/\]:::ioStyle --> READ_CART[Leer Puertos de Cartucho]:::processStyle
         READ_CART --> DEC_CART{¿Cartucho Presente?}:::decisionStyle
         
-        DEC_CART -- NO --> WARN_C[/Aviso: Inserte Cartucho/\]:::ioStyle --> RET1[/Volver a Menú/\]:::ioStyle
+        DEC_CART -- NO --> WARN_C[/Aviso: Inserte Cartucho/\]:::ioStyle --> MENU_CONF
         
         DEC_CART -- SÍ --> DEC_PORT{¿Ubicación del Cartucho?}:::decisionStyle
         
