@@ -18,7 +18,7 @@ flowchart TD
         POLL_POT -- NO --> STANDBY[Standby Local]:::processStyle
         POLL_POT -- SÍ --> BOOT_SCR[/Pantalla de Inicio 64x64/\]:::ioStyle --> CHECK_PERIPH{¿PS/2 o NES Detected?}:::decisionStyle
         
-        CHECK_PERIPH -- NO --> WARN_P[/Aviso: 'Conectar Periférico'/\]:::ioStyle
+        CHECK_PERIPH -- NO --> WARN_P[/Aviso: Conectar Periférico/\]:::ioStyle
         WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
         WAIT_P -- SÍ --> CHECK_PERIPH
         WAIT_P -- NO --> WARN_P
@@ -31,18 +31,18 @@ flowchart TD
         MENU_CONF[/Menú Configuración Principal/\]:::ioStyle --> READ_CART[Leer Puertos de Cartucho]:::processStyle
         READ_CART --> DEC_CART{¿Cartucho Presente?}:::decisionStyle
         
-        DEC_CART -- NO --> WARN_C[/Aviso: 'Inserte Cartucho'/\]:::ioStyle --> RET1[/Volver a Menú/\]:::ioStyle
+        DEC_CART -- NO --> WARN_C[/Aviso: Inserte Cartucho/\]:::ioStyle --> RET1[/Volver a Menú/\]:::ioStyle
         
         DEC_CART -- SÍ --> DEC_PORT{¿Ubicación del Cartucho?}:::decisionStyle
         
         %% Cartucho Local
-        DEC_PORT -- Puerto Local --> EN_SINGLE[Modo Single-Player / Local]:::processStyle --> SET_OPT1[Opciones: Jugar | Scores | Salir]:::processStyle
+        DEC_PORT -- Puerto Local --> EN_SINGLE[Modo Single-Player / Local]:::processStyle --> SET_OPT1[Opciones: Jugar - Scores - Salir]:::processStyle
         
         %% Cartucho Maestro
         DEC_PORT -- Puerto Maestro --> DEC_MULTI_CAP{¿El Juego del Cartucho<br/>Admite Multijugador?}:::decisionStyle
         
         DEC_MULTI_CAP -- NO --> EN_MIRROR[Modo Espejo: Mismo juego en pantallas activas]:::processStyle --> SET_OPT1
-        DEC_MULTI_CAP -- SÍ --> EN_MULTI[Modo Multijugador Habilitado]:::processStyle --> SET_OPT2[Opciones: Jugar | Multijugador | Scores | Salir]:::processStyle
+        DEC_MULTI_CAP -- SÍ --> EN_MULTI[Modo Multijugador Habilitado]:::processStyle --> SET_OPT2[Opciones: Jugar - Multijugador - Scores - Salir]:::processStyle
     end
 
     SET_OPT1 --> GAME_MENU[/Menú Selección del Juego/\]:::ioStyle
@@ -57,7 +57,7 @@ flowchart TD
         
         %% Multijugador
         DEC_OPT -- MULTIJUGADOR --> CHECK_SLAVES{¿Hay otras pantallas<br/>encendidas?}:::decisionStyle
-        CHECK_SLAVES -- NO --> BEEP_MULTI[/Pitidos Buzzer + 'Encender Pantallas'/\]:::ioStyle --> RET2
+        CHECK_SLAVES -- NO --> BEEP_MULTI[/Pitidos Buzzer + Encender Pantallas/\]:::ioStyle --> RET2
         CHECK_SLAVES -- SÍ --> SYNC_MULTI[Sincronizar FPGAs vía SPI]:::processStyle --> RUN_GAME
         
         %% Jugar
