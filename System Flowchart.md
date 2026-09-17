@@ -1,73 +1,76 @@
 ```mermaid
 flowchart TD
-    %% Estilos de Nodos
+    %% Estilos
     classDef terminalStyle fill:#1a365d,stroke:#2b6cb0,stroke-width:2px,color:#fff;
     classDef processStyle fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff;
     classDef decisionStyle fill:#744210,stroke:#d69e2e,stroke-width:2px,color:#fff;
     classDef ioStyle fill:#22543d,stroke:#38a169,stroke-width:2px,color:#fff;
 
-    %% FASE 1: ENCENDIDO Y POST (PLACA MAESTRA)
-    START([Inicio: Presionar Botón Power Tapa Superior]):::terminalStyle --> READ_BAT[Lectura de Voltaje Batería / Adaptador]:::processStyle
-    READ_BAT --> DEC_BAT{¿Voltaje<br/>Suficiente?}:::decisionStyle
-    
-    DEC_BAT -- NO --> ERR_BAT[Parpadear LED Carga 3 Veces - Azul]:::processStyle --> OFF_POWER([Fin: Apagado por Alimentación Deficiente]):::terminalStyle
-    
-    DEC_BAT -- SÍ --> SET_LED[Fijar LED Carga: Verde / Naranja / Rojo]:::processStyle
-    SET_LED --> BEEP_POST[/Emitir Tono POST en Buzzer Interno/\]:::ioStyle
-    BEEP_POST --> SCAN_BUS[FPGA Maestra Escanea Bus Inter-FPGA]:::processStyle
+    %% FASE 1: POST Y ENTRADAS
+    subgraph F1["1. POST Y PERIFÉRICOS"]
+        START([Inicio: Botón Power]):::terminalStyle --> READ_BAT[Lectura de Voltaje Batería]:::processStyle
+        READ_BAT --> DEC_BAT{¿Voltaje OK?}:::decisionStyle
+        
+        DEC_BAT -- NO --> ERR_BAT[Parpadear LED Azul 3 Veces]:::processStyle --> OFF1([Apagado]):::terminalStyle
+        DEC_BAT -- SÍ --> BEEP_POST[/Tono POST en Buzzer/\]:::ioStyle --> SCAN_BUS[Escanear Bus Inter-FPGA]:::processStyle
+        
+        SCAN_BUS --> POLL_POT{¿Potenciómetro ON?}:::decisionStyle
+        POLL_POT -- NO --> STANDBY[Standby Local]:::processStyle
+        POLL_POT -- SÍ --> BOOT_SCR[/Pantalla de Inicio 64x64/\]:::ioStyle --> CHECK_PERIPH{¿PS/2 o NES Detected?}:::decisionStyle
+        
+        CHECK_PERIPH -- NO --> WARN_P[/Aviso: 'Conectar Periférico'/\]:::ioStyle
+        WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
+        WAIT_P -- SÍ --> CHECK_PERIPH
+        WAIT_P -- NO --> WARN_P
+    end
 
-    %% FASE 2: DETECCIÓN Y CONFIGURACIÓN INDIVIDUAL POR CARA (FPGA ESCLAVA)
-    SCAN_BUS --> POLL_POT{¿Potenciómetro de Cara<br/>Superó Tope Inicial?}:::decisionStyle
-    
-    POLL_POT -- NO --> STANDBY_FACE[Mantener Pantalla y Módulo Local en Standby]:::processStyle --> POLL_POT
-    
-    POLL_POT -- SÍ --> PWM_DIM[Ajustar PWM Retroiluminación / Brightness]:::processStyle
-    PWM_DIM --> BOOT_SCR[/Desplegar Pantalla de Inicio 64x64/\]:::ioStyle
-    BOOT_SCR --> SHOW_BIOS[/Desplegar Menú BIOS - Información del Sistema/\]:::ioStyle
-    
-    SHOW_BIOS --> CHECK_PERIPH{¿Periférico PS/2<br/>o Mando NES Detectado?}:::decisionStyle
-    
-    CHECK_PERIPH -- NO --> WARN_PERIPH[/Mostrar 'Conectar Periférico'/\]:::ioStyle --> WAIT_KEY{¿Se presionó<br/>algún botón?}:::decisionStyle
-    WAIT_KEY -- NO --> WARN_PERIPH
-    WAIT_KEY -- SÍ --> CHECK_PERIPH
-    
-    CHECK_PERIPH -- SÍ --> MENU_CONF[/Desplegar Menú de Configuración Principal/\]:::ioStyle
+    CHECK_PERIPH -- SÍ --> F2
 
-    %% FASE 3: VERIFICACIÓN DE CARTUCHOS
-    MENU_CONF --> READ_CART[Lectura de Puertos de Cartucho: Maestro e Individual]:::processStyle
-    READ_CART --> DEC_CART{¿Cartucho<br/>Detectado?}:::decisionStyle
-    
-    DEC_CART -- NO --> WARN_CART[/Mostrar 'Inserte Cartucho'/\]:::ioStyle --> MENU_CONF
-    
-    DEC_CART -- SÍ --> EN_START[Habilitar Opción 'Iniciar Juego']:::processStyle
-    EN_START --> DEC_MASTER{¿Cartucho en Puerto<br/>Maestro Superior?}:::decisionStyle
-    
-    DEC_MASTER -- SÍ --> EN_MULTI[Habilitar Opción 'Multijugador']:::processStyle --> GAME_MENU[/Desplegar Menú del Juego/\]:::ioStyle
-    DEC_MASTER -- NO --> DIS_MULTI[Inhabilitar Opción 'Multijugador']:::processStyle --> GAME_MENU
+    %% FASE 2: VERIFICACIÓN DE CARTUCHO Y MODO DE JUEGO
+    subgraph F2["2. VALIDACIÓN DE CARTUCHO"]
+        MENU_CONF[/Menú Configuración Principal/\]:::ioStyle --> READ_CART[Leer Puertos de Cartucho]:::processStyle
+        READ_CART --> DEC_CART{¿Cartucho Presente?}:::decisionStyle
+        
+        DEC_CART -- NO --> WARN_C[/Aviso: 'Inserte Cartucho'/\]:::ioStyle --> RET1[/Volver a Menú/\]:::ioStyle
+        
+        DEC_CART -- SÍ --> DEC_PORT{¿Ubicación del Cartucho?}:::decisionStyle
+        
+        %% Cartucho Local
+        DEC_PORT -- Puerto Local --> EN_SINGLE[Modo Single-Player / Local]:::processStyle --> SET_OPT1[Opciones: Jugar | Scores | Salir]:::processStyle
+        
+        %% Cartucho Maestro
+        DEC_PORT -- Puerto Maestro --> DEC_MULTI_CAP{¿El Juego del Cartucho<br/>Admite Multijugador?}:::decisionStyle
+        
+        DEC_MULTI_CAP -- NO --> EN_MIRROR[Modo Espejo: Mismo juego en pantallas activas]:::processStyle --> SET_OPT1
+        DEC_MULTI_CAP -- SÍ --> EN_MULTI[Modo Multijugador Habilitado]:::processStyle --> SET_OPT2[Opciones: Jugar | Multijugador | Scores | Salir]:::processStyle
+    end
 
-    %% FASE 4: BUCLE DE JUEGO / SELECCIÓN
-    GAME_MENU --> DEC_OPTION{¿Opción Seleccionada<br/>por Usuario?}:::decisionStyle
-    
-    DEC_OPTION -- PUNTAJES --> READ_RAM[Leer High Scores de RAM/EEPROM]:::processStyle --> SHOW_SCORES[/Mostrar Tabla de Puntajes/\]:::ioStyle --> GAME_MENU
-    
-    DEC_OPTION -- MULTIJUGADOR --> CHECK_SLAVES{¿Hay otras pantallas<br/>encendidas?}:::decisionStyle
-    CHECK_SLAVES -- NO --> BEEP_MULTI[/Emitir N Pitidos en Buzzer + Mostrar 'Encender otras Pantallas'/\]:::ioStyle --> GAME_MENU
-    CHECK_SLAVES -- SÍ --> SYNC_MULTI[Sincronizar FPGAs Esclavas vía Bus SPI Maestro]:::processStyle --> RUN_GAME[Ejecutar Lógica del Juego]:::processStyle
-    
-    DEC_OPTION -- JUGAR --> RUN_GAME
-    
-    RUN_GAME --> GAME_STATE{¿Estado en<br/>el Juego?}:::decisionStyle
-    
-    GAME_STATE -- EN JUEGO / PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
-    GAME_STATE -- JUGADOR MUERE --> GAME_MENU
-    
-    GAME_STATE -- SALIR DE JUEGO --> SAFE_UNMOUNT[Desconectar Memoria / Flush Seguro]:::processStyle
-    SAFE_UNMOUNT --> MENU_CONF
+    SET_OPT1 --> GAME_MENU[/Menú Selección del Juego/\]:::ioStyle
+    SET_OPT2 --> GAME_MENU
 
-    %% FASE 5: APAGADO DE LA CONSOLA
-    MENU_CONF --> EVENT_OFF{¿Presión de Botón<br/>Power Tapa Superior?}:::decisionStyle
-    EVENT_OFF -- NO --> MENU_CONF
-    EVENT_OFF -- SÍ --> SAVE_SYS[Guardar Registros de Sistema]:::processStyle
-    SAVE_SYS --> LED_OFF[Parpadear LED Carga 2 Veces - Azul]:::processStyle
-    LED_OFF --> SHUTDOWN([Fin: Apagado Seguro de Consola]):::terminalStyle
+    %% FASE 3: BUCLE DE JUEGO
+    subgraph F3["3. EJECUCIÓN Y BUCLE DE JUEGO"]
+        GAME_MENU --> DEC_OPT{¿Opción Seleccionada?}:::decisionStyle
+        
+        %% Puntajes
+        DEC_OPT -- PUNTAJES --> SHOW_SCORES[/Mostrar High Scores/\]:::ioStyle --> RET2[/Volver a Menú/\]:::ioStyle
+        
+        %% Multijugador
+        DEC_OPT -- MULTIJUGADOR --> CHECK_SLAVES{¿Hay otras pantallas<br/>encendidas?}:::decisionStyle
+        CHECK_SLAVES -- NO --> BEEP_MULTI[/Pitidos Buzzer + 'Encender Pantallas'/\]:::ioStyle --> RET2
+        CHECK_SLAVES -- SÍ --> SYNC_MULTI[Sincronizar FPGAs vía SPI]:::processStyle --> RUN_GAME
+        
+        %% Jugar
+        DEC_OPT -- JUGAR --> RUN_GAME[Ejecutar Lógica de Juego]:::processStyle
+        
+        RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
+        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
+        GAME_STATE -- JUGADOR MUERE --> RET2
+        GAME_STATE -- SALIR DE JUEGO --> SAFE_UNMOUNT[Flush / Desconexión Segura EEPROM]:::processStyle --> RET2
+    end
+
+    %% FASE 4: APAGADO
+    RET2 --> EVENT_OFF{¿Presión Power?}:::decisionStyle
+    EVENT_OFF -- NO --> GAME_MENU
+    EVENT_OFF -- SÍ --> SAVE_SYS[Guardar Registros]:::processStyle --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle --> SHUTDOWN([Apagado Seguro]):::terminalStyle
 ```
