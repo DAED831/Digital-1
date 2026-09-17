@@ -36,28 +36,48 @@ flowchart TD
         DEC_BIOS -- VOLUMEN --> CONF_VOL[/Configurar Volumen Parlante Local/\]:::ioStyle --> BIOS_MENU
         DEC_BIOS -- KEYBINDINGS --> SHOW_KEYS[/Mostrar Mapeo de Teclas: Mouse - NES - Teclado/\]:::ioStyle --> BIOS_MENU
         
-        %% Opcion MULTIJUGADOR (Requiere validación de juego + espera de otra pantalla)
+        %% Opción MULTIJUGADOR
         DEC_BIOS -- MULTIJUGADOR --> CHK_M_CART{¿Hay Cartucho en Puerto Maestro<br/>y es Multijugador Válido?}:::decisionStyle
         CHK_M_CART -- NO --> WARN_NO_MULTI[/Aviso: Inserte Juego Multijugador Válido en Puerto Maestro/\]:::ioStyle --> BIOS_MENU
         CHK_M_CART -- SÍ --> WAIT_SLAVES{¿Hay otra Pantalla Encendida y Lista?}:::decisionStyle
         WAIT_SLAVES -- NO --> WARN_WAIT_SCR[/Buzzer + En Espera de que otra Pantalla se Encienda/\]:::ioStyle --> WAIT_SLAVES
-        WAIT_SLAVES -- SÍ --> EN_PLAY_MULTI[Habilitar opción JUGAR en Menú Multijugador]:::processStyle --> SYNC_MULTI[Sincronizar FPGAs vía Bus SPI]:::processStyle --> RUN_GAME
+        WAIT_SLAVES -- SÍ --> SET_MULTI_FLAG[Activar Flag Modo Multijugador]:::processStyle --> GAME_MENU
         
-        %% Opción JUGAR (Modo Individual / Espejo Directo)
+        %% Opción JUGAR (Individual / Espejo)
         DEC_BIOS -- JUGAR --> CHK_ANY_CART{¿Hay Cartucho Conectado?<br/>Local o Maestro}:::decisionStyle
         CHK_ANY_CART -- NO --> WARN_NO_CART[/Aviso: Inserte un Cartucho de Juego/\]:::ioStyle --> BIOS_MENU
-        
-        %% Ejecución Inmediata
-        CHK_ANY_CART -- SÍ --> RUN_GAME[Ejecutar Lógica del Juego]:::processStyle
+        CHK_ANY_CART -- SÍ --> SET_SINGLE_FLAG[Activar Flag Modo Individual]:::processStyle --> GAME_MENU
     end
 
-    %% FASE 3: BUCLE DE JUEGO Y SALIDA
-    subgraph F3["3. BUCLE DE JUEGO"]
+    %% FASE 3: SUBMENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN
+    subgraph F3["3. MENÚ DEL JUEGO Y EJECUCIÓN"]
+        GAME_MENU[/Menú del Juego: Iniciar Partida - Puntajes - Salir/\]:::ioStyle
+        
+        GAME_MENU --> DEC_GAME_OPT{¿Opción del Juego?}:::decisionStyle
+        
+        %% Puntajes
+        DEC_GAME_OPT -- PUNTAJES --> SHOW_SCORES[/Mostrar Tabla de High Scores/\]:::ioStyle --> GAME_MENU
+        
+        %% Salir del Juego
+        DEC_GAME_OPT -- SALIR --> SAFE_UNMOUNT[Desmontaje Seguro de Memoria / Flush EEPROM]:::processStyle --> RET_BIOS[/Volver a Menú BIOS/\]:::ioStyle
+        
+        %% Iniciar Partida
+        DEC_GAME_OPT -- INICIAR PARTIDA --> CHK_MODE_FLAG{¿Modo de Juego?}:::decisionStyle
+        
+        %% Flujo Multijugador (Requiere Confirmación Doble)
+        CHK_MODE_FLAG -- Multijugador --> CONFIRM_P1[/Pantalla 1: Presione Botón para Confirmar/\]:::ioStyle
+        CONFIRM_P1 --> CONFIRM_P2[/Pantalla 2: Presione Botón para Confirmar/\]:::ioStyle
+        CONFIRM_P2 --> SYNC_SPI[Sincronizar FPGAs vía Bus SPI]:::processStyle --> RUN_GAME[Ejecutar Lógica del Juego]:::processStyle
+        
+        %% Flujo Individual / Espejo
+        CHK_MODE_FLAG -- Individual --> RUN_GAME
+        
+        %% Bucle de Juego Activo
         RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
         
         GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
-        GAME_STATE -- JUGADOR MUERE --> RET_BIOS[/Volver a Menú de Ajustes/\]:::ioStyle
-        GAME_STATE -- SALIR DE JUEGO --> SAFE_UNMOUNT[Flush / Desconexión Segura EEPROM]:::processStyle --> RET_BIOS
+        GAME_STATE -- JUGADOR MUERE --> GAME_MENU
+        GAME_STATE -- SALIR DE PAUSA --> GAME_MENU
     end
 
     RET_BIOS --> BIOS_MENU
