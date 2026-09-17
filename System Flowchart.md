@@ -22,21 +22,15 @@ flowchart TD
         WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
         WAIT_P -- SÍ --> CHECK_PERIPH
         WAIT_P -- NO --> WARN_P
-
     end
 
     CHECK_PERIPH -- SÍ --> BIOS_MENU
-
-    %% FASE 4: APAGADO
-    BIOS_MENU --> EVENT_OFF{¿Presión Botón Power?}:::decisionStyle
-    EVENT_OFF -- NO --> BIOS_MENU
-    EVENT_OFF -- SÍ --> SAVE_SYS[Guardar Registros de Sistema]:::processStyle --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle --> SHUTDOWN([Apagado Seguro]):::terminalStyle
 
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
         BIOS_MENU[/Menú de Ajustes: Volumen - Keybindings - Batería - Jugar - Multijugador/\]:::ioStyle
         
-        BIOS_MENU --> DEC_BIOS{¿Opción Seleccionada?}:::decisionStyle
+        BIOS_MENU --> DEC_BIOS{¿Opción Seleccionada en Menú?}:::decisionStyle
         
         %% Ajustes secundarios
         DEC_BIOS -- VOLUMEN --> CONF_VOL[/Configurar Volumen Parlante Local/\]:::ioStyle --> BIOS_MENU
@@ -53,7 +47,6 @@ flowchart TD
         DEC_BIOS -- JUGAR --> CHK_ANY_CART{¿Hay Cartucho Conectado?<br/>Local o Maestro}:::decisionStyle
         CHK_ANY_CART -- NO --> WARN_NO_CART[/Aviso: Inserte un Cartucho de Juego/\]:::ioStyle --> BIOS_MENU
         CHK_ANY_CART -- SÍ --> SET_SINGLE_FLAG[Activar Flag Modo Individual]:::processStyle --> GAME_MENU
-    
     end
 
     %% FASE 3: SUBMENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN
@@ -89,4 +82,12 @@ flowchart TD
 
     RET_BIOS --> BIOS_MENU
 
+    %% FASE 4: APAGADO (EVENTO DE HARDWARE)
+    subgraph F4["4. APAGADO GENERAL"]
+        EVENT_PWR[/Evento: Pulsación Botón Power en BIOS/\]:::ioStyle --> SAVE_SYS[Guardar Registros del Sistema]:::processStyle
+        SAVE_SYS --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle
+        LED_OFF --> SHUTDOWN([Apagado Seguro]):::terminalStyle
+    end
+
+    BIOS_MENU -. Interrupción / Pulsación .-> EVENT_PWR
 ```
