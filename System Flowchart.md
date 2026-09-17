@@ -36,31 +36,24 @@ flowchart TD
         DEC_BIOS -- VOLUMEN --> CONF_VOL[/Configurar Volumen Parlante Local/\]:::ioStyle --> BIOS_MENU
         DEC_BIOS -- KEYBINDINGS --> SHOW_KEYS[/Mostrar Mapeo de Teclas: Mouse - NES - Teclado/\]:::ioStyle --> BIOS_MENU
         
-        %% Intento de Iniciar Multijugador
+        %% Opcion MULTIJUGADOR (Requiere validación de juego + espera de otra pantalla)
         DEC_BIOS -- MULTIJUGADOR --> CHK_M_CART{¿Hay Cartucho en Puerto Maestro<br/>y es Multijugador Válido?}:::decisionStyle
         CHK_M_CART -- NO --> WARN_NO_MULTI[/Aviso: Inserte Juego Multijugador Válido en Puerto Maestro/\]:::ioStyle --> BIOS_MENU
         CHK_M_CART -- SÍ --> WAIT_SLAVES{¿Hay otra Pantalla Encendida y Lista?}:::decisionStyle
         WAIT_SLAVES -- NO --> WARN_WAIT_SCR[/Buzzer + En Espera de que otra Pantalla se Encienda/\]:::ioStyle --> WAIT_SLAVES
         WAIT_SLAVES -- SÍ --> EN_PLAY_MULTI[Habilitar opción JUGAR en Menú Multijugador]:::processStyle --> SYNC_MULTI[Sincronizar FPGAs vía Bus SPI]:::processStyle --> RUN_GAME
         
-        %% Intento de Iniciar Modo Individual / Espejo
+        %% Opción JUGAR (Modo Individual / Espejo Directo)
         DEC_BIOS -- JUGAR --> CHK_ANY_CART{¿Hay Cartucho Conectado?<br/>Local o Maestro}:::decisionStyle
         CHK_ANY_CART -- NO --> WARN_NO_CART[/Aviso: Inserte un Cartucho de Juego/\]:::ioStyle --> BIOS_MENU
         
-        CHK_ANY_CART -- SÍ --> CHK_TYPE{¿Tipo de Cartucho y Puerto?}:::decisionStyle
-        
-        %% Cartucho Local Directo
-        CHK_TYPE -- Local --> RUN_GAME
-        
-        %% Cartucho Maestro No Multijugador (Espejo)
-        CHK_TYPE -- Maestro No Multijugador --> CHK_OTHER_ON{¿Otras Pantallas Encendidas?}:::decisionStyle
-        CHK_OTHER_ON -- NO --> WAIT_MIRROR[/En Espera a que otra Pantalla se Encienda para Continuar/\]:::ioStyle --> CHK_OTHER_ON
-        CHK_OTHER_ON -- SÍ --> SYNC_MIRROR[Transmitir Frame/Datos a Pantallas Activas]:::processStyle --> RUN_GAME
+        %% Ejecución Inmediata
+        CHK_ANY_CART -- SÍ --> RUN_GAME[Ejecutar Lógica del Juego]:::processStyle
     end
 
     %% FASE 3: BUCLE DE JUEGO Y SALIDA
     subgraph F3["3. BUCLE DE JUEGO"]
-        RUN_GAME[Ejecutar Lógica del Juego]:::processStyle --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
+        RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
         
         GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
         GAME_STATE -- JUGADOR MUERE --> RET_BIOS[/Volver a Menú de Ajustes/\]:::ioStyle
