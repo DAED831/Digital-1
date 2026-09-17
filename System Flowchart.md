@@ -31,7 +31,7 @@ flowchart TD
         MENU_CONF[/Menú Configuración Principal/\]:::ioStyle --> READ_CART[Leer Puertos de Cartucho]:::processStyle
         READ_CART --> DEC_CART{¿Cartucho Presente?}:::decisionStyle
         
-        DEC_CART -- NO --> WARN_C[/Aviso: Inserte Cartucho/\]:::ioStyle --> MENU_CONF
+        DEC_CART -- NO --> WARN_C[/Aviso: Inserte Cartucho/\]:::ioStyle -> MENU_CONF
         
         DEC_CART -- SÍ --> DEC_PORT{¿Ubicación del Cartucho?}:::decisionStyle
         
