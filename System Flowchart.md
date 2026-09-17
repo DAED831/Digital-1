@@ -27,6 +27,11 @@ flowchart TD
 
     CHECK_PERIPH -- SÍ --> BIOS_MENU
 
+    %% FASE 4: APAGADO
+    BIOS_MENU --> EVENT_OFF{¿Presión Botón Power?}:::decisionStyle
+    EVENT_OFF -- NO --> BIOS_MENU
+    EVENT_OFF -- SÍ --> SAVE_SYS[Guardar Registros de Sistema]:::processStyle --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle --> SHUTDOWN([Apagado Seguro]):::terminalStyle
+
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
         BIOS_MENU[/Menú de Ajustes: Volumen - Keybindings - Batería - Jugar - Multijugador/\]:::ioStyle
@@ -84,8 +89,4 @@ flowchart TD
 
     RET_BIOS --> BIOS_MENU
 
-    %% FASE 4: APAGADO
-    BIOS_MENU --> EVENT_OFF{¿Presión Botón Power?}:::decisionStyle
-    EVENT_OFF -- NO --> BIOS_MENU
-    EVENT_OFF -- SÍ --> SAVE_SYS[Guardar Registros de Sistema]:::processStyle --> LED_OFF[LED Azul Parpadea 2 Veces]:::processStyle --> SHUTDOWN([Apagado Seguro]):::terminalStyle
 ```
