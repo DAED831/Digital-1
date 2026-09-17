@@ -86,8 +86,8 @@ flowchart TD
         %% Bucle de Juego Activo
         RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
         GAME_STATE -- JUGADOR MUERE --> GAME_MENU
-        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::io
-        MENU_PAUSE --> MENU_PAUSE_OPT{"¿Opción Pausa?"}:::decision
+        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle
+        MENU_PAUSE --> MENU_PAUSE_OPT{"¿Opción Pausa?"}:::decisionStyle
         MENU_PAUSE_OPT -- CONTINUAR --> RUN_GAME
         MENU_PAUSE_OPT -- SALIR --> GAME_MENU
     end
