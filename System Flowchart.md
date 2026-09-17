@@ -49,35 +49,37 @@ flowchart TD
         CHK_ANY_CART -- SÍ --> SET_SINGLE_FLAG[Activar Flag Modo Individual]:::processStyle --> GAME_MENU
     end
 
-    %% FASE 3: SUBMENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN
-    subgraph F3["3. MENÚ DEL JUEGO Y EJECUCIÓN"]
-        GAME_MENU[/Menú del Juego: Iniciar Partida - Puntajes - Salir/\]:::ioStyle
-        
-        GAME_MENU --> DEC_GAME_OPT{¿Opción del Juego?}:::decisionStyle
-        
+    %% FASE 3: BUCLE DE JUEGO Y PAUSA DETALLADO
+    subgraph F3["3. MENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN"]
+        G_Menu[/"Menú del Juego"/]:::io --> G_Opt{"¿Opción Juego?"}:::decision
+
         %% Puntajes
-        DEC_GAME_OPT -- PUNTAJES --> SHOW_SCORES[/Mostrar Tabla de High Scores/\]:::ioStyle --> GAME_MENU
-        
-        %% Salir del Juego
-        DEC_GAME_OPT -- SALIR --> SAFE_UNMOUNT[Desmontaje Seguro de Memoria / Flush EEPROM]:::processStyle --> RET_BIOS[/Volver a Menú BIOS/\]:::ioStyle
-        
+        G_Opt -- PUNTAJES --> G_Pts[/"Tabla Puntajes"/]:::io --> G_Menu
+
+        %% Salir del juego a BIOS
+        G_Opt -- SALIR --> G_Flush["Flush EEPROM / Unmount"]:::process --> B_Menu
+
         %% Iniciar Partida
-        DEC_GAME_OPT -- INICIAR PARTIDA --> CHK_MODE_FLAG{¿Modo de Juego?}:::decisionStyle
+        G_Opt -- INICIAR PARTIDA --> G_Flag{"¿Modo Flag?"}:::decision
+        G_Flag -- INDIVIDUAL / ESPEJO --> G_Run["RUN_GAME (Ejecución)"]:::process
+
+        G_Flag -- MULTIJUGADOR --> G_ConfP1[/"Confirm. P1"/]:::io
+        G_ConfP1 --> G_ConfP2[/"Confirm. P2"/]:::io
+        G_ConfP2 --> G_SPI["Sincronizar SPI"]:::process
+        G_SPI --> G_Run
+
+        %% Evaluación de Estado durante RUN_GAME
+        G_Run --> G_State{"¿Estado?"}:::decision
         
-        %% Flujo Multijugador (Requiere Confirmación Doble)
-        CHK_MODE_FLAG -- Multijugador --> CONFIRM_P1[/Pantalla 1: Presione Botón para Confirmar/\]:::ioStyle
-        CONFIRM_P1 --> CONFIRM_P2[/Pantalla 2: Presione Botón para Confirmar/\]:::ioStyle
-        CONFIRM_P2 --> SYNC_SPI[Sincronizar FPGAs vía Bus SPI]:::processStyle --> RUN_GAME[Ejecutar Lógica del Juego]:::processStyle
+        %% Salida por Muerte
+        G_State -- MUERTE --> G_Menu
         
-        %% Flujo Individual / Espejo
-        CHK_MODE_FLAG -- Individual --> RUN_GAME
+        %% Salida por Menú de Pausa
+        G_State -- PAUSA --> G_PauseMenu[/"Menú Pausa"/]:::io
+        G_PauseMenu --> G_PauseOpt{"¿Opción Pausa?"}:::decision
         
-        %% Bucle de Juego Activo
-        RUN_GAME --> GAME_STATE{¿Estado de Juego?}:::decisionStyle
-        
-        GAME_STATE -- PAUSA --> MENU_PAUSE[/Menú Pausa: Continuar o Salir/\]:::ioStyle --> GAME_STATE
-        GAME_STATE -- JUGADOR MUERE --> GAME_MENU
-        GAME_STATE -- SALIR DE PAUSA --> GAME_MENU
+        G_PauseOpt -- CONTINUAR --> G_Run
+        G_PauseOpt -- SALIR --> G_Menu
     end
 
     RET_BIOS --> BIOS_MENU
