@@ -19,12 +19,8 @@ flowchart TD
         POLL_POT -- SÍ --> BOOT_SCR[/Pantalla de Inicio 64x64/\]:::ioStyle --> CHECK_PERIPH{¿Periférico Detectado?}:::decisionStyle
         
         CHECK_PERIPH -- NO --> WARN_P[/Aviso: Conectar Periférico/\]:::ioStyle
-        WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
-        WAIT_P -- SÍ --> CHECK_PERIPH
-        WAIT_P -- NO --> WARN_P
-    end
 
-    CHECK_PERIPH -- SÍ --> BIOS_MENU
+    end
 
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
@@ -47,7 +43,12 @@ flowchart TD
         DEC_BIOS -- JUGAR --> CHK_ANY_CART{¿Hay Cartucho Conectado?<br/>Local o Maestro}:::decisionStyle
         CHK_ANY_CART -- NO --> WARN_NO_CART[/Aviso: Inserte un Cartucho de Juego/\]:::ioStyle --> BIOS_MENU
         CHK_ANY_CART -- SÍ --> SET_SINGLE_FLAG[Activar Flag Modo Individual]:::processStyle --> GAME_MENU
+    
     end
+
+    WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
+    WAIT_P -- SÍ --> CHECK_PERIPH
+    WAIT_P -- NO --> WARN_P
 
     %% FASE 3: SUBMENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN
     subgraph F3["3. MENÚ DEL JUEGO Y EJECUCIÓN"]
