@@ -19,12 +19,13 @@ flowchart TD
         POLL_POT -- SÍ --> BOOT_SCR[/Pantalla de Inicio 64x64/\]:::ioStyle --> CHECK_PERIPH{¿Periférico Detectado?}:::decisionStyle
         
         CHECK_PERIPH -- NO --> WARN_P[/Aviso: Conectar Periférico/\]:::ioStyle
+        WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
+        WAIT_P -- SÍ --> CHECK_PERIPH
+        WAIT_P -- NO --> WARN_P
 
     end
 
-    WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
-    WAIT_P -- SÍ --> CHECK_PERIPH
-    WAIT_P -- NO --> WARN_P
+    CHECK_PERIPH -- SÍ --> BIOS_MENU
 
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
