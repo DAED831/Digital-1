@@ -22,6 +22,10 @@ flowchart TD
 
     end
 
+    WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
+    WAIT_P -- SÍ --> CHECK_PERIPH
+    WAIT_P -- NO --> WARN_P
+
     %% FASE 2: MENÚ DE AJUSTES DEL SISTEMA (BIOS / INICIO)
     subgraph F2["2. MENÚ DE AJUSTES DEL SISTEMA"]
         BIOS_MENU[/Menú de Ajustes: Volumen - Keybindings - Batería - Jugar - Multijugador/\]:::ioStyle
@@ -45,10 +49,6 @@ flowchart TD
         CHK_ANY_CART -- SÍ --> SET_SINGLE_FLAG[Activar Flag Modo Individual]:::processStyle --> GAME_MENU
     
     end
-
-    WARN_P --> WAIT_P{¿Pulsó Botón?}:::decisionStyle
-    WAIT_P -- SÍ --> CHECK_PERIPH
-    WAIT_P -- NO --> WARN_P
 
     %% FASE 3: SUBMENÚ DEL JUEGO Y BUCLE DE EJECUCIÓN
     subgraph F3["3. MENÚ DEL JUEGO Y EJECUCIÓN"]
