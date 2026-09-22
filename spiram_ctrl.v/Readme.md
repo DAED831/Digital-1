@@ -1,4 +1,4 @@
-#SPIRAM_CTRL.V
+# SPIRAM_CTRL.V
 
 This space is set for specifications on assigned SPIRAM control modulo within console logic functioning. 
 
