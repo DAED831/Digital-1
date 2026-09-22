@@ -1,6 +1,6 @@
 # SPIRAM_CTRL.V
 
-This space is set for specifications on assigned SPIRAM control modulo within console logic functioning. 
+This space is set for specifications on assigned SPIRAM control module within console logic functioning. 
 
 ![RAM Type Differentiation](Images/RAM type description.png)
 
