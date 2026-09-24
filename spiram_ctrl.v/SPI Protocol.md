@@ -10,7 +10,7 @@ Aunque el protocolo es serial, no consiste en el serial convensional con TX y RX
 
 Aunque el protocolo serial convencional funcionaba, se generaba mucha carga por la presencia de los bits adicionales y podían producirse errores.
 
-
+![Serial Convencional](../Images/Serial%20Convencional.png)
 
 ## La solución seríal síncrona
 Para corregir los problemas en la diferencia del reloj de la protocolo serial convencional se creó el protocolo SPI. 
