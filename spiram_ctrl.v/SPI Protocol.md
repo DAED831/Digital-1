@@ -15,4 +15,4 @@ Aunque el protocolo serial convencional funcionaba, se generaba mucha carga por 
 ## La solución seríal síncrona (SPI)
 Para corregir los problemas en la diferencia del reloj del protocolo serial convencional se creó el protocolo SPI. El SPI consistía en un bus de datos síncrono, lo que implicaba su sincronía total con el receptor y con ello la presencia de líneas separadas de datos y reloj. La línea del reloj es una señal oscilante que le indica al receptor cúando muestrear los bits de las líneas de datos; pudiendo ser durante el flanco ascendente (subiendo) o descendente (bajando) -se especifica cuál de los dos usar en una hoja de datos-. En el instante en el que el receptor detecte ese flanco, pasa a la lectura del siguiente bit y puesto que se envía un línea de reloj no es necesario especificar la velocidad lo que facilita que el dispositivo/hardware sea más sencillo que en el caso asíncrono (y de menor precio).
 
-![Protocolo SPI](../Images/SPI.png)
+![Protocolo SPI](../Images/SPI.jpg)
