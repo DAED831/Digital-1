@@ -31,3 +31,4 @@ Puesto que existe una velocidad de reloj preestablecida en SPI eso permite al co
 
 Otra línea presente en el protocolo SPI habla del tipo de chip, denominada *CHIP SELECT*. Como su nombre lo indica permite seleccionar un periférico específico para darle la orden de recibir/enviar datos. Esta línea suele permanecer alta para desconectar el periférico del bus. Ates del envío de los datos (COPI o CIPO) se baja la señal para habilitar el periférico y vuelve a subir después de que termina. 
 
+![Chip Select Line.](../Images/CS.png)
