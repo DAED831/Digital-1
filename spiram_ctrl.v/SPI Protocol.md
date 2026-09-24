@@ -46,3 +46,7 @@ Los periféricos conectados comparten las líneas de transmisión de datos y de 
 En este caso las líneas de entrada y salida se interconectan entre los periféricos hasta el controlador (CIPO periférico 1 a COPI periférico 2, etc). Sólo se requiere una línea CS y para enviar algún dato se deben despertar todos los periféricos y cuando se desea enviar un dato a alguno particular, se deben enviar suficientes datos como para que alcancen para todos ya que la información se envía como si fuera una cola; el primer dato enviado llega al primer periférico y así según el orden de conexión. Por su estructura suele usarse sólo en sistemas de transmisión exclusiva de datos.
 
 ![Chain.](../Images/Chain.png)
+
+# Fuente: 
+
+1. MCI Electronics. (2022, 23 de agosto). Serial Peripheral Interface (SPI). Cursos MCI Electronics. https://cursos.mcielectronics.cl/2022/08/23/serial-peripheral-interface-spi/
