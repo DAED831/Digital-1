@@ -20,3 +20,6 @@ Para corregir los problemas en la diferencia del reloj del protocolo serial conv
 Aunque esto soluciona la parte correspondiente al envío de información, aún falta definir como se recibe la información.
 
 En SPI la señal del reloj (CLK o SCK) es enviada desde un único lado denominado controlador (microcontrolador spiram_ctrl.v) y el lado que la recibe se denomina periférico (chip de memoria); aunque pueden haber muchos periféricos, sólo hay un controlador. Cuando los datos se envían hacia el periférico desde el controlador se hace por una línea denominada COPI (controller out-peripheral in) y cuando se envían del periférico al controlador se denominan CIPO (controller in-peripheral out). En este caso pueden haber dos líneas de datos, de forma que cuando el controlador envía información al periférico lo hace mediante la línea de COPI y si el periférico necesita enviar una respuesta lo hará mediante otra línea llamada CIPO conservando la sincronización con los ciclos de reloj del controlador (no desaparecen).
+
+![CIPO COPI line data mechanism.](../Images/SPI2lines.png)
+
