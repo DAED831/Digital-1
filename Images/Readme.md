@@ -6,5 +6,6 @@ Every image in this folder will be assigned and specified in this file. Based on
 | :--- | :--- | :--- |
 | `RAM type description.png` | Screenshot based on a conversation held with IA | Gemini |
 | `Serial Convencional` | Downloaded picture from web forum | https://cursos.mcielectronics.cl/2022/08/23/serial-peripheral-interface-spi/ |
+| `SPI` | Downloaded picture from web forum | https://cursos.mcielectronics.cl/2022/08/23/serial-peripheral-interface-spi/ |
 | `TBD` | TBD | TBD |
 
